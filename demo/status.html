@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniCrawler — Status</title>
+  <link rel="stylesheet" href="/demo/css/style.css" />
+  <style>
+    /* ── Summary strip ── */
+    .summary-strip {
+      background:    var(--bg-surface);
+      border:        1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow:    var(--shadow-sm);
+      margin-bottom: 1.5rem;
+      overflow:      hidden;
+    }
+
+    .summary-strip-top {
+      display:       flex;
+      align-items:   center;
+      padding:       0.65rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background:    var(--bg-subtle);
+      gap:           0.75rem;
+      flex-wrap:     wrap;
+    }
+
+    .summary-strip-heading {
+      font-size:      0.68rem;
+      font-weight:    700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color:          var(--text-sub);
+      flex-shrink:    0;
+    }
+
+    .status-pills {
+      display:     flex;
+      align-items: center;
+      gap:         0.35rem;
+      flex-wrap:   wrap;
+    }
+
+    .status-pill {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            0.22rem;
+      padding:        0.16rem 0.52rem;
+      border-radius:  999px;
+      font-size:      0.67rem;
+      font-weight:    600;
+      letter-spacing: 0.02em;
+      border:         1px solid transparent;
+      white-space:    nowrap;
+    }
+
+    .status-pill::before {
+      content:       '';
+      width:         5px;
+      height:        5px;
+      border-radius: 50%;
+      background:    currentColor;
+      flex-shrink:   0;
+    }
+
+    .status-pill-running { color: var(--green); background: var(--green-light); border-color: #a7f3d0; }
+    .status-pill-paused  { color: var(--amber); background: var(--amber-light); border-color: #fde68a; }
+    .status-pill-completed    { color: var(--text-muted); background: var(--bg-raised); border-color: var(--border); }
+    .status-pill-running::before { animation: pulse-dot 2s ease-in-out infinite; }
+
+    .summary-strip-actions {
+      margin-left: auto;
+      display:     flex;
+      align-items: center;
+      gap:         0.5rem;
+      flex-shrink: 0;
+    }
+
+    .summary-strip-body {
+      display:    grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap:        1px;
+      background: var(--border);
+    }
+
+    .summary-cell {
+      background:     var(--bg-surface);
+      padding:        0.875rem 1.05rem;
+      display:        flex;
+      flex-direction: column;
+      gap:            0.15rem;
+      transition:     background var(--ease);
+    }
+
+    .summary-cell:hover { background: var(--bg-subtle); }
+
+    .summary-cell-label {
+      font-size:      0.6rem;
+      font-weight:    600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--text-muted);
+      white-space:    nowrap;
+    }
+
+    .summary-cell-value {
+      font-size:      1.2rem;
+      font-weight:    700;
+      color:          var(--text);
+      letter-spacing: -0.02em;
+      line-height:    1.15;
+    }
+
+    .summary-cell-value.purple { color: var(--purple); }
+    .summary-cell-value.green  { color: var(--green);  }
+    .summary-cell-value.amber  { color: var(--amber);  }
+    .summary-cell-value.muted  { color: var(--text-muted); }
+
+    /* ── Lookup bar ── */
+    .lookup-bar {
+      background:    var(--bg-surface);
+      border:        1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow:    var(--shadow-sm);
+      padding:       0.875rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display:       flex;
+      align-items:   center;
+      gap:           0.75rem;
+      flex-wrap:     wrap;
+    }
+
+    .lookup-bar-label {
+      font-size:      0.7rem;
+      font-weight:    600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--text-muted);
+      white-space:    nowrap;
+      flex-shrink:    0;
+    }
+
+    .lookup-bar-inner {
+      display:     flex;
+      flex:        1;
+      gap:         0.6rem;
+      align-items: center;
+      min-width:   0;
+      flex-wrap:   wrap;
+    }
+
+    .lookup-bar-inner input {
+      flex:          1;
+      min-width:     160px;
+      background:    var(--bg-surface);
+      border:        1.5px solid var(--border);
+      border-radius: var(--r);
+      padding:       0.5rem 0.875rem;
+      font-family:   var(--sans);
+      font-size:     0.875rem;
+      color:         var(--text);
+      outline:       none;
+      box-shadow:    var(--shadow-xs);
+      transition:    border-color var(--ease), box-shadow var(--ease);
+    }
+
+    .lookup-bar-inner input:hover:not(:focus) { border-color: var(--border-hover); }
+    .lookup-bar-inner input:focus {
+      border-color: var(--border-focus);
+      box-shadow:   0 0 0 3px rgba(124,58,237,0.1);
+    }
+    .lookup-bar-inner input::placeholder { color: var(--text-dim); }
+
+    .lookup-divider {
+      width:       1px;
+      height:      26px;
+      background:  var(--border);
+      flex-shrink: 0;
+    }
+
+    .auto-refresh-label {
+      display:     flex;
+      align-items: center;
+      gap:         0.38rem;
+      font-size:   0.775rem;
+      font-weight: 500;
+      color:       var(--text-muted);
+      cursor:      pointer;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .auto-refresh-label input[type="checkbox"] {
+      accent-color: var(--purple);
+      width:        13px;
+      height:       13px;
+      cursor:       pointer;
+    }
+
+    .last-updated {
+      font-size:   0.72rem;
+      color:       var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ── Crawlers card ── */
+    .crawlers-card {
+      background:    var(--bg-surface);
+      border:        1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow:    var(--shadow-sm);
+      overflow:      hidden;
+    }
+
+    .crawlers-card-header {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         0.875rem 1.5rem;
+      border-bottom:   1px solid var(--border);
+      background:      var(--bg-subtle);
+      gap:             1rem;
+      flex-wrap:       wrap;
+    }
+
+    .crawlers-card-body { padding: 0 1.5rem; }
+
+        /* ── Session rows ── */
+    .session-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .session-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .session-row:last-child {
+      border-bottom: none;
+    }
+
+    .session-row-left {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-row-url {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.35;
+      word-break: break-word;
+      margin-bottom: 8px;
+    }
+
+    .session-row-id {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.82rem;
+      margin-right: 0.45rem;
+    }
+
+    .session-row-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+    }
+
+    .session-row-meta span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .session-row-meta span b {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .session-row-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 104px;
+      height: 25px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .session-row-right .btn.btn-primary:hover,
+    .session-row-right .btn.btn-primary:focus,
+    .session-row-right .btn.btn-primary:active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+      box-shadow: none;
+      transform: none;
+      filter: none;
+    }
+
+    .badge-running {
+      background: rgba(31, 186, 98, 0.12);
+      color: #2f8f5b;
+      border-color: rgba(31, 186, 98, 0.2);
+    }
+
+    .badge-paused {
+      background: rgba(218, 157, 35, 0.12);
+      color: #ad6f0a;
+      border-color: rgba(218, 157, 35, 0.25);
+    }
+
+    .badge-stopping {
+      background: rgba(105, 98, 223, 0.1);
+      color: #6b63c7;
+      border-color: rgba(105, 98, 223, 0.18);
+    }
+
+    .badge-done {
+      background: rgba(107, 99, 199, 0.1);
+      color: #6b63c7;
+      border-color: rgba(107, 99, 199, 0.18);
+    }
+
+    .badge-error {
+      background: rgba(217, 70, 70, 0.1);
+      color: #b73d3d;
+      border-color: rgba(217, 70, 70, 0.18);
+    }
+
+    @media (max-width: 900px) {
+      .summary-strip-body {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .session-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    
+      .session-row-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .summary-strip-body {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    
+      .crawlers-card-body {
+        padding: 0 1rem;
+      }
+    
+      .session-row {
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="navbar-brand">Mini<span>Crawler</span></span>
+    <div class="nav-links">
+        <a href="/search">Search</a>
+        <a href="/crawler">Create Crawler</a>
+        <a href="/status" class="active">Crawler Status</a>
+    </div>
+  </nav>
+
+  <main class="page">
+
+    <div class="page-header">
+      <h1>Crawler Status</h1>
+      <p>Overview of all crawl sessions. Click Details to inspect a specific crawler.</p>
+    </div>
+
+    <!-- ── Dashboard summary strip ───────────────────────── -->
+    <div class="summary-strip">
+      <div class="summary-strip-top">
+        <span class="summary-strip-heading">Dashboard</span>
+        <div class="status-pills">
+          <span class="status-pill status-pill-running">
+            <span id="pill-running">0</span>&nbsp;running
+          </span>
+          <span class="status-pill status-pill-paused">
+            <span id="pill-paused">0</span>&nbsp;paused
+          </span>
+          <span class="status-pill status-pill-stopping">
+            <span id="pill-stopping">0</span>&nbsp;stopping
+          </span>
+          <span class="status-pill status-pill-done">
+            <span id="pill-completed">0</span>&nbsp;completed
+          </span>
+          <span class="status-pill status-pill-error">
+            <span id="pill-error">0</span>&nbsp;error
+          </span>
+        </div>
+        <div class="summary-strip-actions">
+          <button class="btn btn-ghost btn-sm" onclick="loadSessions()">
+            <span id="refresh-icon">↻</span> Refresh
+          </button>
+        </div>
+      </div>
+      <div class="summary-strip-body">
+        <div class="summary-cell">
+          <div class="summary-cell-label">Total Sessions</div>
+          <div class="summary-cell-value purple" id="st-total">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Active Crawlers</div>
+          <div class="summary-cell-value green" id="st-active">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Pages Indexed</div>
+          <div class="summary-cell-value" id="st-pages">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">URLs Visited</div>
+          <div class="summary-cell-value" id="st-urls">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">URLs Skipped</div>
+          <div class="summary-cell-value amber" id="st-skipped">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Avg Hit Rate</div>
+          <div class="summary-cell-value" id="st-hitrate">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Words in DB</div>
+          <div class="summary-cell-value purple" id="st-words">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Total Workers</div>
+          <div class="summary-cell-value muted" id="st-workers">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Avg Queue Use</div>
+          <div class="summary-cell-value" id="st-queue-util">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Back Pressure</div>
+          <div class="summary-cell-value amber" id="st-pressure">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Lookup / jump bar ──────────────────────────────── -->
+    <div class="lookup-bar">
+      <span class="lookup-bar-label">Jump to ID</span>
+      <div class="lookup-bar-inner">
+        <input id="lookup-input"
+               type="number" min="1"
+               placeholder="Enter crawler session ID…"
+               onkeydown="if(event.key==='Enter') goToDetail()" />
+        <button class="btn btn-primary btn-sm" onclick="goToDetail()">
+          View Details
+        </button>
+        <div class="lookup-divider"></div>
+        <button class="btn btn-ghost btn-sm" onclick="clearLookup()">
+          Clear
+        </button>
+      </div>
+      <label class="auto-refresh-label">
+        <input type="checkbox" id="auto-refresh" checked
+               onchange="toggleAutoRefresh(this.checked)" />
+        Auto-refresh
+      </label>
+      <span class="last-updated" id="last-updated"></span>
+    </div>
+
+    <!-- ── All crawlers list ──────────────────────────────── -->
+    <div class="crawlers-card">
+      <div class="crawlers-card-header">
+        <span class="card-title">All Crawlers</span>
+        <span id="session-count" class="text-sm text-muted"></span>
+      </div>
+      <div class="crawlers-card-body">
+        <div id="sessions-container">
+          <div class="empty-state">Loading sessions…</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script src="/demo/js/status.js"></script>
+</body>
+</html>

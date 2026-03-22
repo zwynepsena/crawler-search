@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniCrawler — New Session</title>
+  <link rel="stylesheet" href="/demo/css/style.css" />
+  <style>
+    .main-card,
+    #result-panel,
+    .summary-strip {
+      width: 100%;
+      margin: 0;
+    }
+
+    .summary-strip {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .summary-strip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      padding: 0.6rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-subtle);
+    }
+    
+    .summary-strip-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+    
+    .summary-strip-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    
+    .summary-cell {
+      background: #fff;
+      padding: 0.82rem 0.95rem;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.14rem;
+    }
+    
+    .summary-cell-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    
+    .summary-cell-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+    }
+    
+    .page-title-row {
+      text-align: center;
+      margin: 0.9rem 0 1.25rem;
+    }
+    
+    .page-title-row h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.4rem;
+    }
+    
+    .page-title-row p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .card {
+      border-radius: var(--r-lg);
+    }
+    
+    .main-card {
+      padding: 1.25rem 1.35rem;
+    }
+    
+    .form-section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    
+    .form-row-2,
+    .form-row-3 {
+      display: grid;
+      gap: 0.9rem 1.2rem;
+    }
+    
+    .field label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+    
+    .field input {
+      width: 100%;
+      min-height: 42px;
+      font-size: 0.9rem;
+    }
+    
+    .hint {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    
+    .start-btn-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.25rem;
+    }
+    
+    .start-btn-row .btn-primary {
+      min-width: 190px;
+      min-height: 44px;
+      padding: 0.72rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.18);
+    }
+    
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      margin-bottom: 0.9rem;
+      flex-wrap: wrap;
+    }
+    
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    
+    .recent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.9rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--bg-subtle);
+      flex-wrap: wrap;
+    }
+    
+    .recent-item-left {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+    }
+    
+    .recent-item-url {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    
+    .recent-item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem 0.9rem;
+    }
+    
+    .recent-item-meta span {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    
+    .recent-item-meta span b {
+      color: var(--text-sub);
+      font-weight: 700;
+    }
+    
+    .recent-item-right {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-shrink: 0;
+    }
+    
+    .status-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.22rem;
+      padding: 0.16rem 0.52rem;
+      border-radius: 999px;
+      font-size: 0.67rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .status-pill-running {
+      color: var(--green);
+      background: var(--green-light);
+      border-color: #a7f3d0;
+    }
+
+    .status-pill-paused {
+      color: var(--amber);
+      background: var(--amber-light);
+      border-color: #fde68a;
+    }
+
+    .status-pill-completed {
+      color: var(--text-muted);
+      background: var(--bg-raised);
+      border-color: var(--border);
+    }
+
+    #result-panel {
+      padding: 1.35rem 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .form-row-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page-shell {
+        width: min(100% - 24px, 1000px);
+        margin-top: 1rem;
+      }
+
+      .form-row-2,
+      .form-row-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-cell-value {
+        font-size: 1.25rem;
+      }
+
+      .main-card {
+        padding: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <span class="navbar-brand">Mini<span>Crawler</span></span>
+    <div class="nav-links">
+      <a href="/search">Search</a>
+      <a href="/crawler" class="active">Create Crawler</a>
+      <a href="/status">Crawler Status</a>
+    </div>
+  </nav>
+
+  <main class="page">
+
+    <div class="summary-strip">
+      <div class="summary-strip-top">
+        <span class="summary-strip-label">Crawler Dashboard</span>
+
+        <div class="status-pills">
+          <span class="status-pill status-pill-running" id="pill-running">
+            <span id="pill-running-val">0</span> running
+          </span>
+          <span class="status-pill status-pill-paused" id="pill-paused">
+            <span id="pill-paused-val">0</span> paused
+          </span>
+          <span class="status-pill status-pill-completed" id="pill-completed">
+            <span id="pill-completed-val">0</span> completed
+          </span>
+        </div>
+
+        <div class="summary-strip-actions">
+          <button class="btn btn-ghost btn-sm" onclick="loadStats()" id="strip-refresh-btn">
+            <span id="strip-refresh-icon">↻</span> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="summary-strip-body">
+        <div class="summary-cell">
+          <div class="summary-cell-label">Total Sessions</div>
+          <div class="summary-cell-value purple" id="stat-total">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Active Crawlers</div>
+          <div class="summary-cell-value green" id="stat-active">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Pages Indexed</div>
+          <div class="summary-cell-value" id="stat-pages">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">URLs Visited</div>
+          <div class="summary-cell-value" id="stat-urls">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">URLs Skipped</div>
+          <div class="summary-cell-value amber" id="stat-skipped">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Avg Hit Rate</div>
+          <div class="summary-cell-value" id="stat-hitrate">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Words in DB</div>
+          <div class="summary-cell-value purple" id="stat-words">—</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Total Workers</div>
+          <div class="summary-cell-value muted" id="stat-workers">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-title-row">
+      <h1>Create Crawl Session</h1>
+      <p>Configure and launch a new web-crawl job. Results are available for search immediately.</p>
+    </div>
+
+    <div class="card main-card">
+      <div class="form-section-label">Session Configuration</div>
+
+      <div class="form-row-2" style="margin-bottom:1rem">
+        <div class="field" style="grid-column: 1 / -1">
+          <label for="origin_url">Origin URL</label>
+          <input
+            id="origin_url"
+            type="url"
+            placeholder="https://example.com"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span class="hint">Starting point — must be http:// or https://</span>
+        </div>
+      </div>
+
+      <div class="form-row-3" style="margin-bottom:1rem">
+        <div class="field">
+          <label for="max_depth">Max Depth</label>
+          <input id="max_depth" type="number" value="2" min="0" max="10" />
+          <span class="hint">0 = origin page only</span>
+        </div>
+
+        <div class="field">
+          <label for="num_workers">Workers</label>
+          <input id="num_workers" type="number" value="4" min="1" max="16" />
+          <span class="hint">Parallel fetcher threads</span>
+        </div>
+
+        <div class="field">
+          <label for="requests_per_sec">Requests / sec</label>
+          <input id="requests_per_sec" type="number" value="2" min="0.1" max="20" step="0.1" />
+          <span class="hint">Rate limit across all workers</span>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="field">
+          <label for="queue_capacity">Queue Capacity</label>
+          <input id="queue_capacity" type="number" value="100" min="10" max="2000" />
+          <span class="hint">Bounded queue (back pressure)</span>
+        </div>
+
+        <div class="field">
+          <label for="max_urls">Max URLs to Visit</label>
+          <input id="max_urls" type="number" value="200" min="1" max="10000" />
+          <span class="hint">Hard cap per session</span>
+        </div>
+      </div>
+
+      <div class="start-btn-row">
+        <button id="btn-start" class="btn btn-primary" onclick="startSession()">
+          <span id="btn-start-icon">▶</span>
+          <span id="btn-start-text">Start Crawl</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="result-panel" class="card" style="display:none">
+      <div class="card-header-row">
+        <span class="card-title">Session Started</span>
+        <a href="/status" class="btn btn-ghost btn-sm">View Status →</a>
+      </div>
+      <div id="result-content"></div>
+    </div>
+
+    <div class="card main-card">
+      <div class="card-header-row">
+        <span class="card-title">Recent Crawlers</span>
+        <button class="btn btn-ghost btn-sm" onclick="loadRecent()">↻ Refresh</button>
+      </div>
+      <div id="recent-list">
+        <div class="empty-state">Loading recent sessions…</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script src="/demo/js/crawler.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadStats();
+      loadRecent();
+    });
+
+    async function loadStats() {
+      const icon = document.getElementById("strip-refresh-icon");
+      icon.className = "spinner";
+      icon.textContent = "";
+
+      try {
+        const resp = await fetch("/api/sessions");
+        if (!resp.ok) throw new Error();
+        const sessions = await resp.json();
+
+        const running = sessions.filter(s => s.status === "running").length;
+        const paused  = sessions.filter(s => s.status === "paused").length;
+        const completed    = sessions.filter(s => s.status === "completed").length;
+        const pages   = sessions.reduce((a, s) => a + (s.pages_indexed || 0), 0);
+        const urls    = sessions.reduce((a, s) => a + (s.urls_seen || 0), 0);
+        const skipped = sessions.reduce((a, s) => a + (s.urls_skipped || 0), 0);
+        const workers = sessions.reduce((a, s) => a + (s.active_workers || 0), 0);
+
+        const activeSessions = sessions.filter(s => s.urls_seen > 0);
+        const avgHit = activeSessions.length
+          ? activeSessions.reduce((a, s) => a + (s.hit_rate || 0), 0) / activeSessions.length
+          : 0;
+
+        const wordEst = pages * 600;
+
+        document.getElementById("pill-running-val").textContent = running;
+        document.getElementById("pill-paused-val").textContent = paused;
+        document.getElementById("pill-completed-val").textContent = completed;
+
+        document.getElementById("stat-total").textContent = sessions.length;
+        document.getElementById("stat-active").textContent = running;
+        document.getElementById("stat-pages").textContent = fmtNum(pages);
+        document.getElementById("stat-urls").textContent = fmtNum(urls);
+        document.getElementById("stat-skipped").textContent = fmtNum(skipped);
+        document.getElementById("stat-hitrate").textContent =
+          activeSessions.length ? (avgHit * 100).toFixed(1) + "%" : "—";
+        document.getElementById("stat-words").textContent = pages ? fmtNum(wordEst) : "—";
+        document.getElementById("stat-workers").textContent = workers;
+      } catch {
+      } finally {
+        icon.className = "";
+        icon.textContent = "↻";
+      }
+    }
+
+    async function loadRecent() {
+      const container = document.getElementById("recent-list");
+
+      try {
+        const resp = await fetch("/api/sessions");
+        if (!resp.ok) throw new Error();
+
+        const sessions = await resp.json();
+
+        if (!sessions.length) {
+          container.innerHTML = `<div class="empty-state">No sessions yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="recent-list">
+            ${sessions.slice(0, 8).map(renderRecentItem).join("")}
+          </div>
+        `;
+      } catch {
+        container.innerHTML = `<div class="empty-state">Could not load sessions.</div>`;
+      }
+    }
+
+    function renderRecentItem(s) {
+      const bc = {
+        running: "badge-running",
+        stopping: "badge-stopping",
+        paused: "badge-paused",
+        completed: "badge-completed",
+        error: "badge-error"
+      }[s.status] || "badge-completed";
+
+      return `
+        <div class="recent-item">
+          <div class="recent-item-left">
+            <div class="recent-item-url" title="${esc(s.origin_url)}">${esc(s.origin_url)}</div>
+            <div class="recent-item-meta">
+              <span>depth <b>${s.max_depth}</b></span>
+              <span>max urls <b>${s.max_urls}</b></span>
+              <span>indexed <b>${s.pages_indexed}</b></span>
+              <span>seen <b>${s.urls_seen}</b></span>
+              <span>hit rate <b>${s.urls_seen > 0 ? (s.hit_rate * 100).toFixed(1) + "%" : "—"}</b></span>
+            </div>
+          </div>
+          <div class="recent-item-right">
+            <span class="badge ${bc}">${s.status}</span>
+            <a href="/status/${s.session_id}" class="btn btn-ghost btn-sm">Details</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function fmtNum(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
+      if (n >= 1000) return (n / 1000).toFixed(1) + "K";
+      return String(n);
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>

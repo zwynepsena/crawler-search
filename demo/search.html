@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniCrawler — Search</title>
+  <link rel="stylesheet" href="/demo/css/style.css" />
+  <style>
+
+    /* ── Search page layout ── */
+    .search-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
+    }
+
+    /* ── Hero section ── */
+    .search-hero {
+      text-align: center;
+      padding: 3.5rem 1rem 2.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .search-hero-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: var(--purple-light);
+      border-radius: var(--r-lg);
+      font-size: 1.55rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .search-hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      margin-bottom: 0.45rem;
+    }
+
+    .search-hero h1 span { color: var(--purple); }
+
+    .search-hero p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 380px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Search input area ── */
+    .search-box-wrap {
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .search-main-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: stretch;
+    }
+
+    .search-main-input {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 0.78rem 1.1rem;
+      font-family: var(--sans);
+      font-size: 0.975rem;
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+
+    .search-main-input:hover:not(:focus) {
+      border-color: var(--border-hover);
+    }
+
+    .search-main-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    }
+
+    .search-main-input::placeholder { color: var(--text-dim); }
+
+    .search-btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-advanced {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 52px;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 0 1rem;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--ease), box-shadow var(--ease);
+      box-sizing: border-box;
+    }
+    
+    .field select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 2.75rem;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-sub) 50%),
+        linear-gradient(135deg, var(--text-sub) 50%, transparent 50%);
+      background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 13px) calc(50% - 3px);
+      background-size: 7px 7px, 7px 7px;
+      background-repeat: no-repeat;
+    }
+    
+    .field input[type="number"] {
+      appearance: auto;
+      -webkit-appearance: auto;
+      -moz-appearance: auto;
+    }
+
+    .field input:hover:not(:focus),
+    .field select:hover:not(:focus) {
+      border-color: var(--border-hover);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+    }
+
+    .results-area {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .results-meta,
+    .results-query-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    #results-container {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .result-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.1rem 1.4rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+
+    .result-item:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .result-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.22rem;
+      line-height: 1.35;
+    }
+
+    .result-url {
+      font-family: var(--mono);
+      font-size: 0.775rem;
+      color: var(--purple);
+      word-break: break-all;
+      line-height: 1.45;
+    }
+
+    .result-meta {
+      display: flex;
+      gap: 1.1rem;
+      margin-top: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .result-meta span {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+
+    .result-meta span b {
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .score-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 0.65rem;
+    }
+
+    .score-bar-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: var(--purple-mid);
+      border-radius: 999px;
+      transition: width 400ms ease;
+    }
+
+    .score-bar-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .search-hint {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      justify-content: center;
+    }
+
+    .hint-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.18rem 0.65rem;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background var(--ease), border-color var(--ease), color var(--ease);
+      white-space: nowrap;
+    }
+
+    .hint-chip:hover {
+      background: var(--purple-light);
+      border-color: var(--purple-mid);
+      color: var(--purple);
+    }
+
+    @media (max-width: 700px) {
+      .search-main-row {
+        flex-direction: column;
+      }
+
+      .search-btn-group {
+        width: 100%;
+      }
+
+      .search-btn-group .btn {
+        flex: 1;
+      }
+
+      .search-advanced {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="navbar-brand">Mini<span>Crawler</span></span>
+    <div class="nav-links">
+      <a href="/search" class="active">Search</a>
+      <a href="/crawler">Create Crawler</a>
+      <a href="/status">Crawler Status</a>
+    </div>
+  </nav>
+
+  <main class="search-page">
+
+    <div class="search-hero">
+      <div class="search-hero-icon-wrap">🔍</div>
+      <h1>Search the <span>Index</span></h1>
+      <p>Full-text search across all crawled and indexed pages.
+         Results appear as crawling continues.</p>
+    </div>
+
+    <div class="search-box-wrap">
+
+      <div class="search-main-row">
+        <input
+          id="query"
+          class="search-main-input"
+          type="text"
+          placeholder="Type a keyword or phrase…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="search-btn-group">
+          <button class="btn btn-primary" onclick="runSearch()">
+            Search
+          </button>
+          <button class="btn btn-ghost" onclick="clearResults()">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="search-hint" id="hint-chips">
+        <span class="hint-chip" onclick="setQuery('wikipedia')">wikipedia</span>
+        <span class="hint-chip" onclick="setQuery('history')">history</span>
+        <span class="hint-chip" onclick="setQuery('science')">science</span>
+        <span class="hint-chip" onclick="setQuery('python')">python</span>
+        <span class="hint-chip" onclick="setQuery('technology')">technology</span>
+      </div>
+
+      <div class="search-advanced">
+        <div class="field">
+          <label for="session_id">
+            Session ID
+            <span class="text-muted" style="font-weight:400">(optional)</span>
+          </label>
+          <select id="session_id">
+            <option value="">All sessions</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="limit">Result Limit</label>
+          <input id="limit" type="number" value="20" min="1" max="200" />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="results-area">
+      <div id="results-header" class="results-header" style="display:none">
+        <span class="results-meta" id="results-meta"></span>
+        <span class="results-query-label" id="results-query-label"></span>
+      </div>
+
+      <div id="results-container"></div>
+    </div>
+
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script src="/demo/js/search.js"></script>
+  <script>
+    function setQuery(term) {
+      document.getElementById("query").value = term;
+      runSearch();
+    }
+  </script>
+</body>
+</html>

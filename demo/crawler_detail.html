@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniCrawler — Crawler Detail</title>
+  <link rel="stylesheet" href="/demo/css/style.css" />
+  <style>
+
+    /* ── Back bar ── */
+    .back-bar {
+      display:       flex;
+      align-items:   center;
+      gap:           0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap:     wrap;
+    }
+
+    .back-link {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           0.3rem;
+      font-size:     0.835rem;
+      font-weight:   600;
+      color:         var(--text-muted);
+      border-radius: var(--r-sm);
+      padding:       0.3rem 0.6rem;
+      transition:    color var(--ease), background var(--ease);
+    }
+
+    .back-link:hover {
+      color:           var(--purple);
+      background:      var(--purple-light);
+      text-decoration: none;
+    }
+
+    .back-bar-sep {
+      color:     var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    .back-bar-title {
+      font-size:   0.835rem;
+      font-weight: 600;
+      color:       var(--text-sub);
+    }
+
+    /* ── Hero card ── */
+    .hero-card {
+      background:    var(--bg-surface);
+      border:        1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow:    var(--shadow-sm);
+      margin-bottom: 1.25rem;
+      overflow:      hidden;
+    }
+
+    .hero-card-header {
+      padding:       1.35rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      background:    var(--bg-subtle);
+      display:       flex;
+      align-items:   flex-start;
+      justify-content: space-between;
+      gap:           1rem;
+      flex-wrap:     wrap;
+    }
+
+    .hero-session-id {
+      font-size:      0.67rem;
+      font-weight:    700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--purple);
+      margin-bottom:  0.3rem;
+    }
+
+    .hero-session-url {
+      font-size:   1.05rem;
+      font-weight: 700;
+      color:       var(--text);
+      word-break:  break-all;
+      line-height: 1.35;
+      max-width:   580px;
+    }
+
+    .hero-actions {
+      display:     flex;
+      align-items: center;
+      gap:         0.6rem;
+      flex-shrink: 0;
+      flex-wrap:   wrap;
+    }
+
+    .hero-card-body { padding: 1.35rem 1.75rem; }
+
+    /* ── Config row ── */
+    .config-row {
+      display:       flex;
+      gap:           1.5rem;
+      flex-wrap:     wrap;
+      padding:       0.85rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.1rem;
+    }
+
+    .config-item {
+      display:        flex;
+      flex-direction: column;
+      gap:            0.15rem;
+    }
+
+    .config-label {
+      font-size:      0.62rem;
+      font-weight:    600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--text-muted);
+    }
+
+    .config-value {
+      font-size:   0.9rem;
+      font-weight: 600;
+      color:       var(--text-sub);
+    }
+
+    .config-value.purple { color: var(--purple); }
+    .config-value.green  { color: var(--green);  }
+
+    /* ── Progress section ── */
+    .progress-section { margin-bottom: 1.25rem; }
+
+    .progress-section-title {
+      font-size:      0.68rem;
+      font-weight:    700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--text-muted);
+      margin-bottom:  0.75rem;
+    }
+
+    .progress-bars { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .progress-bar-item {}
+
+    .progress-bar-label-row {
+      display:         flex;
+      justify-content: space-between;
+      align-items:     center;
+      margin-bottom:   0.28rem;
+    }
+
+    .progress-bar-label-row span {
+      font-size:   0.77rem;
+      font-weight: 500;
+      color:       var(--text-muted);
+    }
+
+    .progress-bar-label-row b {
+      color:       var(--text-sub);
+      font-weight: 600;
+    }
+
+    /* ── Section card (logs, queue) ── */
+    .section-card {
+      background:    var(--bg-surface);
+      border:        1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow:    var(--shadow-sm);
+      margin-bottom: 1.25rem;
+      overflow:      hidden;
+    }
+
+    .section-card-header {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         0.8rem 1.35rem;
+      border-bottom:   1px solid var(--border);
+      background:      var(--bg-subtle);
+      gap:             1rem;
+    }
+
+    .section-card-body { padding: 1rem 1.35rem; }
+
+    /* ── Queue list ── */
+    .queue-list { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .queue-item {
+      display:       flex;
+      align-items:   center;
+      gap:           0.75rem;
+      padding:       0.45rem 0.75rem;
+      background:    var(--bg-subtle);
+      border:        1px solid var(--border);
+      border-radius: var(--r);
+      font-size:     0.8rem;
+    }
+
+    .queue-item-depth {
+      font-size:      0.65rem;
+      font-weight:    600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color:          var(--purple);
+      background:     var(--purple-light);
+      padding:        0.1rem 0.45rem;
+      border-radius:  999px;
+      white-space:    nowrap;
+      flex-shrink:    0;
+    }
+
+    .queue-item-url {
+      font-family:   var(--mono);
+      font-size:     0.775rem;
+      color:         var(--text-sub);
+      white-space:   nowrap;
+      overflow:      hidden;
+      text-overflow: ellipsis;
+      min-width:     0;
+    }
+
+    /* ── Log list ── */
+    .log-list {
+      display:        flex;
+      flex-direction: column;
+      gap:            0.3rem;
+      max-height:     280px;
+      overflow-y:     auto;
+    }
+
+    .log-item {
+      display:       flex;
+      align-items:   flex-start;
+      gap:           0.75rem;
+      padding:       0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size:     0.8rem;
+    }
+
+    .log-item:last-child { border-bottom: none; }
+
+    .log-time {
+      font-family: var(--mono);
+      font-size:   0.72rem;
+      color:       var(--text-dim);
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 0.05rem;
+    }
+
+    .log-url {
+      font-family:   var(--mono);
+      font-size:     0.775rem;
+      color:         var(--text-sub);
+      word-break:    break-all;
+      line-height:   1.5;
+    }
+
+    .log-depth {
+      font-size:      0.65rem;
+      font-weight:    600;
+      color:          var(--purple);
+      background:     var(--purple-light);
+      padding:        0.1rem 0.42rem;
+      border-radius:  999px;
+      white-space:    nowrap;
+      flex-shrink:    0;
+      margin-top:     0.08rem;
+    }
+
+    /* ── Timestamps row ── */
+    .timestamps-row {
+      display:    flex;
+      gap:        2rem;
+      flex-wrap:  wrap;
+      margin-top: 0.5rem;
+    }
+
+    .timestamp-item { display: flex; flex-direction: column; gap: 0.12rem; }
+
+    .timestamp-label {
+      font-size:      0.62rem;
+      font-weight:    600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--text-muted);
+    }
+
+    .timestamp-value {
+      font-size:   0.835rem;
+      font-weight: 500;
+      color:       var(--text-sub);
+      font-family: var(--mono);
+    }
+
+    /* ── Error banner ── */
+    .error-banner {
+      background:    var(--red-light);
+      border:        1px solid #fecaca;
+      border-radius: var(--r);
+      padding:       0.75rem 1rem;
+      font-size:     0.85rem;
+      color:         var(--red);
+      margin-bottom: 1.25rem;
+      font-weight:   500;
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="navbar-brand">Mini<span>Crawler</span></span>
+    <div class="nav-links">
+        <a href="/search">Search</a>
+        <a href="/crawler">Create Crawler</a>
+        <a href="/status" class="active">Crawler Status</a>
+    </div>
+  </nav>
+
+  <main class="page">
+
+    <!-- ── Back navigation ───────────────────────────────── -->
+    <div class="back-bar">
+      <a href="/status" class="back-link">← All Crawlers</a>
+      <span class="back-bar-sep">/</span>
+      <span class="back-bar-title" id="back-title">Session …</span>
+    </div>
+
+    <!-- ── Error banner (hidden unless error) ────────────── -->
+    <div id="error-banner" class="error-banner" style="display:none"></div>
+
+    <!-- ── Hero / main detail card ───────────────────────── -->
+    <div class="hero-card" id="hero-card">
+      <div class="hero-card-header">
+        <div style="min-width:0">
+          <div class="hero-session-id" id="hero-session-id">Session —</div>
+          <div class="hero-session-url" id="hero-session-url">Loading…</div>
+        </div>
+        <div class="hero-actions" id="hero-actions">
+          <button class="btn btn-ghost btn-sm" onclick="loadDetail()">
+            <span id="refresh-icon">↻</span> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-card-body">
+
+        <!-- Config strip -->
+        <div class="config-row" id="config-row">
+          <div class="config-item">
+            <div class="config-label">Status</div>
+            <div class="config-value" id="cfg-status">—</div>
+          </div>
+          <div class="config-item">
+            <div class="config-label">Max Depth</div>
+            <div class="config-value" id="cfg-depth">—</div>
+          </div>
+          <div class="config-item">
+            <div class="config-label">Max URLs</div>
+            <div class="config-value" id="cfg-maxurls">—</div>
+          </div>
+          <div class="config-item">
+            <div class="config-label">Workers</div>
+            <div class="config-value" id="cfg-workers">—</div>
+          </div>
+          <div class="config-item">
+            <div class="config-label">Queue Cap</div>
+            <div class="config-value" id="cfg-qcap">—</div>
+          </div>
+          <div class="config-item">
+            <div class="config-label">Hit Rate</div>
+            <div class="config-value green" id="cfg-hitrate">—</div>
+          </div>
+        </div>
+
+        <!-- Stat grid -->
+        <div class="stat-grid" id="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">Pages Indexed</div>
+            <div class="stat-value green" id="stat-pages">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">URLs Seen</div>
+            <div class="stat-value" id="stat-urls">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Skipped</div>
+            <div class="stat-value amber" id="stat-skipped">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Active Workers</div>
+            <div class="stat-value purple" id="stat-workers">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Queue Depth</div>
+            <div class="stat-value" id="stat-qdepth">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Queue Capacity</div>
+            <div class="stat-value" id="stat-qcap">—</div>
+          </div>
+        </div>
+
+        <!-- Progress bars -->
+        <div class="progress-section">
+          <div class="progress-section-title">Progress</div>
+          <div class="progress-bars">
+
+            <div class="progress-bar-item">
+              <div class="progress-bar-label-row">
+                <span>URLs visited
+                  <b id="prog-urls-val">0 / 0</b>
+                </span>
+                <span id="prog-urls-pct">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="prog-urls-fill"
+                     style="width:0%;background:var(--purple-mid)"></div>
+              </div>
+            </div>
+
+            <div class="progress-bar-item">
+              <div class="progress-bar-label-row">
+                <span>Queue pressure
+                  <b id="prog-queue-val">0 / 0</b>
+                </span>
+                <span id="prog-queue-pct">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="prog-queue-fill"
+                     style="width:0%;background:var(--purple-mid)"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Timestamps -->
+        <div class="timestamps-row" id="timestamps-row">
+          <div class="timestamp-item">
+            <div class="timestamp-label">Started</div>
+            <div class="timestamp-value" id="ts-created">—</div>
+          </div>
+          <div class="timestamp-item">
+            <div class="timestamp-label">Last Updated</div>
+            <div class="timestamp-value" id="ts-updated">—</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Current queue section ─────────────────────────── -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="card-title">Current Queue</span>
+        <span id="queue-count" class="text-sm text-muted"></span>
+      </div>
+      <div class="section-card-body">
+        <div id="queue-container">
+          <div class="empty-state" style="padding:1.5rem 0">
+            Queue data not available.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Crawler log section ───────────────────────────── -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="card-title">Indexed Pages Log</span>
+        <span id="log-count" class="text-sm text-muted"></span>
+      </div>
+      <div class="section-card-body">
+        <div id="log-container">
+          <div class="empty-state" style="padding:1.5rem 0">
+            No pages indexed yet.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script src="/demo/js/crawler_detail.js"></script>
+</body>
+</html>
