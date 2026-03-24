@@ -115,7 +115,7 @@ function renderResults(data) {
         <div class="result-meta">
           <span><b>Origin:</b> ${origin}</span>
           <span><b>Session:</b> ${sessionId}</span>
-          <span><b>Score:</b> ${score.toFixed(4)}</span>
+          <span><b>Score:</b> ${score}</span>
         </div>
 
         <div class="score-bar">
